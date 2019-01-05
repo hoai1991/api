@@ -80,10 +80,10 @@ public class ProductController {
             return new ResponseEntity(productRepo.findById(id), HttpStatus.OK);
     }
 
-//    @GetMapping("find/price/range")
-//    public ResponseEntity findProductInRange(@RequestBody Map<String, String> body) {
-//
-//    }
+   @GetMapping("find/price/range")
+   public ResponseEntity findProductInRange(@RequestBody Map<String, String> body) {
+        return new ResponseEntity(HttpStatus.OK);
+   }
     //Show product
     //Thêm
     //Sửa
