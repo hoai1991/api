@@ -53,6 +53,7 @@ public class ProductController {
         else {
             ProductEntity productEntity = getProductEntityFromRequest(body);
             productRepo.save(productEntity);
+//            productRepo.saveAndFlush()
             return new ResponseEntity(HttpStatus.OK);
         }
     }
@@ -63,7 +64,7 @@ public class ProductController {
         if(productRepo.findById(id) == null)
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         else {
-            ProductEntity productEntity = productRepo.findById(id);
+            ProductEntity productEntity = productRepo.findByIdIs(id);
             productEntity.setStatus(0);
             productRepo.save(productEntity);
             return new ResponseEntity(HttpStatus.OK);
@@ -80,10 +81,10 @@ public class ProductController {
             return new ResponseEntity(productRepo.findById(id), HttpStatus.OK);
     }
 
-   @GetMapping("find/price/range")
-   public ResponseEntity findProductInRange(@RequestBody Map<String, String> body) {
-        return new ResponseEntity(HttpStatus.OK);
-   }
+//    @GetMapping("find/price/range")
+//    public ResponseEntity findProductInRange(@RequestBody Map<String, String> body) {
+//
+//    }
     //Show product
     //Thêm
     //Sửa
