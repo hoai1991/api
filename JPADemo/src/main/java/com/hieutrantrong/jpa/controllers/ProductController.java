@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +24,8 @@ public class ProductController {
     public ResponseEntity getAll() {
         if(productRepo.findAll().isEmpty())
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        else
-            return new ResponseEntity(productRepo.findAll(), HttpStatus.OK);
+
+        return new ResponseEntity(productRepo.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("find")
@@ -35,8 +36,8 @@ public class ProductController {
 
         if(list.isEmpty())
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        else
-            return new ResponseEntity(list, HttpStatus.OK);
+
+        return new ResponseEntity(list, HttpStatus.OK);
     }
 
     @PostMapping("create")
@@ -48,8 +49,7 @@ public class ProductController {
 
     @PutMapping("update")
     public ResponseEntity updateProduct(@RequestBody Map<String, String> body) {
-        if (productRepo.findById(body.get("id")) == null)
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        if (productRepo.findById(body.get("id")) == null) return new ResponseEntity(HttpStatus.NOT_FOUND);
         else {
             ProductEntity productEntity = getProductEntityFromRequest(body);
             productRepo.save(productEntity);
@@ -61,8 +61,7 @@ public class ProductController {
     //problem
     @PutMapping("remove/{id}")
     public ResponseEntity removeProduct(@PathVariable String id) {
-        if(productRepo.findById(id) == null)
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        if(productRepo.findById(id) == null) return new ResponseEntity(HttpStatus.NOT_FOUND);
         else {
             ProductEntity productEntity = productRepo.findByIdIs(id);
             productEntity.setStatus(0);
@@ -74,11 +73,9 @@ public class ProductController {
     //problem
     @GetMapping("find/{id}")
     public ResponseEntity findById(@PathVariable String id) {
-        if(productRepo.findById(id) == null) {
+        if(productRepo.findById(id) == null)
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
-        else
-            return new ResponseEntity(productRepo.findById(id), HttpStatus.OK);
+        return new ResponseEntity(productRepo.findById(id), HttpStatus.OK);
     }
 
 //    @GetMapping("find/price/range")
@@ -100,8 +97,11 @@ public class ProductController {
         String description = body.get("description");
         Float price = Float.parseFloat(body.get("price"));
         Integer status = Integer.parseInt(body.get("status"));
-        Timestamp createdTime = Timestamp.valueOf(body.get("createdTime"));
-        Timestamp editedTime = Timestamp.valueOf(body.get("editedTime"));
+//        Timestamp createdTime = Timestamp.valueOf(body.get("createdTime"));
+//        Timestamp editedTime = Timestamp.valueOf(body.get("editedTime"));
+
+        Timestamp createdTime = new Timestamp(System.currentTimeMillis());
+        Timestamp editedTime = new Timestamp(System.currentTimeMillis());
 
         ProductEntity productEntity = new ProductEntity();
         productEntity.setId(id);
