@@ -74,7 +74,7 @@ public class ProductController {
     public ResponseEntity findProductInRange(@RequestBody Map<String, Float> body) {
         List<ProductEntity> seachList = productRepo.findByPriceBetween(body.get("Price1"),body.get("Price2"));
         if (seachList.isEmpty())return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        return new ResponseEntity(seachList,HttpStatus.FOUND);
+        return new ResponseEntity(seachList,HttpStatus.OK);
     }
 
     //================private methods==================
