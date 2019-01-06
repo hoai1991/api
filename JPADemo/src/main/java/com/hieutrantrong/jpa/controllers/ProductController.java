@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("product")
@@ -21,76 +22,60 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity getAll() {
-        if(productRepo.findAll().isEmpty())
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        else
-            return new ResponseEntity(productRepo.findAll(), HttpStatus.OK);
+        if(productRepo.findAll().isEmpty())return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(productRepo.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("find")
     public ResponseEntity getByNameCaseInsensitive(@RequestBody Map<String, String> body) {
         String search = body.get("search");
-
-        List<ProductEntity> list = productRepo.findByNameContainingIgnoreCase(search);
-
-        if(list.isEmpty())
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        else
-            return new ResponseEntity(list, HttpStatus.OK);
+        ProductEntity productEntity = productRepo.findByIdIs(search);
+        if(productEntity == null) return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(productEntity, HttpStatus.OK);
     }
 
     @PostMapping("create")
     public ResponseEntity createProduct(@RequestBody Map<String, String> body) {
         ProductEntity productEntity = getProductEntityFromRequest(body);
-        productRepo.save(productEntity);
+        Timestamp createdTime = new Timestamp(System.currentTimeMillis());
+        productEntity.setCreatedTime(createdTime);
+        productRepo.saveAndFlush(productEntity);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PutMapping("update")
     public ResponseEntity updateProduct(@RequestBody Map<String, String> body) {
-        if (productRepo.findById(body.get("id")) == null)
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        else {
-            ProductEntity productEntity = getProductEntityFromRequest(body);
-            productRepo.save(productEntity);
-//            productRepo.saveAndFlush()
-            return new ResponseEntity(HttpStatus.OK);
-        }
+        if (productRepo.findById(body.get("id")) == null) return new ResponseEntity(HttpStatus.NOT_FOUND);
+        ProductEntity productEntity = getProductEntityFromRequest(body);
+        Timestamp editedTime = new Timestamp(System.currentTimeMillis());
+        productEntity.setEditedTime(editedTime);
+        productRepo.saveAndFlush(productEntity);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     //problem
     @PutMapping("remove/{id}")
     public ResponseEntity removeProduct(@PathVariable String id) {
-        if(productRepo.findById(id) == null)
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-        else {
-            ProductEntity productEntity = productRepo.findByIdIs(id);
-            productEntity.setStatus(0);
-            productRepo.save(productEntity);
-            return new ResponseEntity(HttpStatus.OK);
-        }
+        if(productRepo.findById(id) == null) return new ResponseEntity(HttpStatus.NOT_FOUND);
+        ProductEntity productEntity = productRepo.findByIdIs(id);
+        productEntity.setStatus(0);
+        productRepo.save(productEntity);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     //problem
     @GetMapping("find/{id}")
     public ResponseEntity findById(@PathVariable String id) {
-        if(productRepo.findById(id) == null) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
-        else
-            return new ResponseEntity(productRepo.findById(id), HttpStatus.OK);
+        if(productRepo.findById(id) == null)return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(productRepo.findById(id), HttpStatus.OK);
     }
 
-//    @GetMapping("find/price/range")
-//    public ResponseEntity findProductInRange(@RequestBody Map<String, String> body) {
-//
-//    }
-    //Show product
-    //Thêm
-    //Sửa
-    //Xoá
-    //Kiếm theo id
-    //Search by price range
+    @GetMapping("find/price/range")
+    public ResponseEntity findProductInRange(@RequestBody Map<String, Float> body) {
+        List<ProductEntity> seachList = productRepo.findByPriceBetween(body.get("Price1"),body.get("Price2"));
+        if (seachList.isEmpty())return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(seachList,HttpStatus.FOUND);
+    }
 
     //================private methods==================
 
@@ -100,18 +85,12 @@ public class ProductController {
         String description = body.get("description");
         Float price = Float.parseFloat(body.get("price"));
         Integer status = Integer.parseInt(body.get("status"));
-        Timestamp createdTime = Timestamp.valueOf(body.get("createdTime"));
-        Timestamp editedTime = Timestamp.valueOf(body.get("editedTime"));
-
         ProductEntity productEntity = new ProductEntity();
         productEntity.setId(id);
         productEntity.setName(name);
         productEntity.setDescription(description);
         productEntity.setPrice(price);
         productEntity.setStatus(status);
-        productEntity.setCreatedTime(createdTime);
-        productEntity.setEditedTime(editedTime);
-
         return productEntity;
     }
 }
